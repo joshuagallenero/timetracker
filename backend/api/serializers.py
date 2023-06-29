@@ -53,17 +53,24 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 
 class TimeRecordSerializer(serializers.ModelSerializer):
+    project_name = serializers.ReadOnlyField(source="project.name")
+
     class Meta:
         model = TimeRecord
         fields = [
             "id",
             "description",
             "project",
+            "project_name",
             "time_started",
             "time_ended",
             "duration",
         ]
-        extra_kwargs = {"duration": {"read_only": True}}
+        extra_kwargs = {
+            "duration": {"read_only": True},
+            "project": {"required": False, "allow_null": True},
+            "description": {"required": False, "allow_null": True},
+        }
 
     def create(self, validated_data):
         request = self.context.get("request")
@@ -78,7 +85,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_records(self, obj):
         user = self.context["request"].user
 
-        records = TimeRecord.objects.filter(user=user).order_by("-id")
+        records = TimeRecord.objects.filter(user=user, project=obj).order_by("-id")
         return TimeRecordSerializer(records, many=True, context={"user": user}).data
 
     class Meta:
