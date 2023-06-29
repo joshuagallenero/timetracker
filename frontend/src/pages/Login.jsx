@@ -1,17 +1,40 @@
+import { useMutation } from '@tanstack/react-query';
 import { Banner } from 'baseui/banner';
 import { Button } from 'baseui/button';
 import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
+import { useEffect } from 'react';
 import { Watch } from 'react-feather';
 import { Controller, useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { login } from '../api/auth';
+import { checkTokens, setToStorage } from '../utils/storage';
+
 export default function Login() {
+  const navigate = useNavigate();
   const { control, handleSubmit } = useForm();
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+      setToStorage('token', data.token);
+      const { token, ...userData } = data;
+      setToStorage('user', JSON.stringify(userData));
+      setToStorage('token', JSON.stringify({ token }));
+      navigate('/home');
+    },
   });
+
+  const onSubmit = handleSubmit((data) => {
+    loginMutation.mutate(data);
+  });
+
+  useEffect(() => {
+    if (checkTokens()) {
+      navigate('/home');
+    }
+  }, [navigate]);
 
   return (
     <div className="flex flex-1 flex-col items-center h-screen bg-white overflow-hidden">
@@ -25,13 +48,15 @@ export default function Login() {
 
         <div className="rounded-2xl max-w-lg w-full">
           <div className="bg-white border rounded-lg shadow-lg shadow-blue-200 shrink-0 px-4 py-6 space-y-8">
-            {/* <Banner
-              title="Login failed"
-              kind="negative"
-              overrides={{ Root: { props: { className: 'm-0' } } }}
-            >
-              Please try again.
-            </Banner> */}
+            {loginMutation.error && (
+              <Banner
+                title="Login failed"
+                kind="negative"
+                overrides={{ Root: { props: { className: 'm-0' } } }}
+              >
+                Please try again.
+              </Banner>
+            )}
             <form className="flex flex-col space-y-4" onSubmit={onSubmit}>
               <Controller
                 control={control}
@@ -39,7 +64,7 @@ export default function Login() {
                 defaultValue=""
                 rules={{ required: true }}
                 render={({
-                  field: { ref, ...field },
+                  field: { ref, ...field }, // acquire ref
                   fieldState: { error },
                 }) => (
                   <FormControl
@@ -49,7 +74,12 @@ export default function Login() {
                     label="Email"
                     error={error?.type === 'required' && 'Required'}
                   >
-                    <Input inputRef={ref} error={!!error} {...field} />
+                    <Input
+                      inputRef={ref} // explicitly pass ref in order for input properties to work as intended
+                      error={!!error}
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                 )}
               />
