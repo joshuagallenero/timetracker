@@ -13,7 +13,7 @@ export function setToStorage(key, value) {
   localStorage.setItem(`${storagePrefix}${key}`, value);
 }
 
-export function checkTokens() {
+export function checkToken() {
   const stored = localStorage.getItem(`${storagePrefix}token`);
 
   if (stored) {
@@ -21,4 +21,9 @@ export function checkTokens() {
   }
 
   return false;
+}
+
+export function clearUserData() {
+  localStorage.removeItem(`${storagePrefix}user`);
+  localStorage.removeItem(`${storagePrefix}token`);
 }
