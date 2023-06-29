@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BaseProvider } from 'baseui';
 import { LightTheme } from 'baseui/themes';
 import React from 'react';
@@ -11,21 +12,25 @@ import './index.css';
 
 const engine = new Styletron();
 
+export const queryClient = new QueryClient();
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <StyletronProvider value={engine}>
-      <BaseProvider
-        theme={LightTheme}
-        overrides={{
-          AppContainer: {
-            props: {
-              className: 'font-sans',
+    <QueryClientProvider client={queryClient}>
+      <StyletronProvider value={engine}>
+        <BaseProvider
+          theme={LightTheme}
+          overrides={{
+            AppContainer: {
+              props: {
+                className: 'font-sans',
+              },
             },
-          },
-        }}
-      >
-        <App />
-      </BaseProvider>
-    </StyletronProvider>
+          }}
+        >
+          <App />
+        </BaseProvider>
+      </StyletronProvider>
+    </QueryClientProvider>
   </React.StrictMode>,
 );
