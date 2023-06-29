@@ -34,6 +34,7 @@ export default function RecordsList({ projects }) {
       return '00:00:00';
     }
 
+    // reduce function adds all duration strings to get the current week's logged hours
     return records
       .map((record) => record.duration)
       .reduce((accumulator, currentValue) =>
@@ -48,15 +49,21 @@ export default function RecordsList({ projects }) {
         const { startTime } = record;
         const [firstDayOfTheWeek] = getCurrentWeek(startTime);
 
+        /*
+          To get each week interval for all time records, each beginning date of the week
+          for each record is acquired and compared to. If it does not exist in the array, it is added
+        */
         if (!dates.includes(firstDayOfTheWeek.toLocaleDateString()))
           dates.push(firstDayOfTheWeek.toLocaleDateString());
       });
 
+      // Each date is then modified to be a tuple containing the start and end dates of the week
       dates.forEach((date, index) => {
         const [firstDay, lastDay] = getCurrentWeek(new Date(date));
         dates[index] = [firstDay, lastDay];
       });
 
+      // Intervals are sorted to show the latest dates first
       return dates.sort((a, b) =>
         b[0].toLocaleDateString().localeCompare(a[0].toLocaleDateString()),
       );

@@ -54,6 +54,7 @@ export default function TimeRecordForm({
     const minutes = duration.substring(3, 5);
     const seconds = duration.substring(6, 8);
 
+    // adding a duration string (HH:mm:ss) to a date object is made consistent by using .setTime()
     const newEndTime = endTime;
     const totalTime =
       Number(hours) * 3600e3 + Number(minutes) * 60e3 + Number(seconds) * 1e3;
@@ -112,6 +113,7 @@ export default function TimeRecordForm({
       startTime.setDate(taskDate.getDate());
       endTime.setDate(taskDate.getDate());
 
+      // on submit is called on blur for form inputs when editing an existing time record
       if (isEditing) {
         onSubmitHandler({
           ...formData,
@@ -122,7 +124,8 @@ export default function TimeRecordForm({
 
         return;
       }
-
+      
+      // else, trigger submit when user manually submits form
       onSubmitHandler(
         {
           ...formData,

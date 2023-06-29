@@ -19,8 +19,10 @@ export default function Register() {
     mutationFn: register,
     onSuccess: (data) => {
       const { token, ...userData } = data;
+      // storing user credentials in localStorage keeps user "logged in"
       setToStorage('user', JSON.stringify(userData));
       setToStorage('token', JSON.stringify({ token }));
+
       navigate('/home');
     },
   });
@@ -30,6 +32,7 @@ export default function Register() {
   });
 
   useEffect(() => {
+    // if user is authenticated and visits this page, redirect user to home page
     if (checkToken()) {
       navigate('/home');
     }

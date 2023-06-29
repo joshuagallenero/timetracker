@@ -20,8 +20,10 @@ export default function Login() {
     onSuccess: (data) => {
       setToStorage('token', data.token);
       const { token, ...userData } = data;
+      // storing user credentials in localStorage keeps user "logged in"
       setToStorage('user', JSON.stringify(userData));
       setToStorage('token', JSON.stringify({ token }));
+
       navigate('/home');
     },
   });
@@ -33,6 +35,7 @@ export default function Login() {
   const { isLoading, isError } = loginMutation;
 
   useEffect(() => {
+    // if user is authenticated and visits this page, redirect user to home page
     if (checkToken()) {
       navigate('/home');
     }

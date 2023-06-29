@@ -25,8 +25,8 @@ function RequiresAuth({ children }) {
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<Outlet />}>
-      <Route path="/login" element={<Login />} />
+    <Route element={<Outlet />}>
+      <Route index path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route
         path="/logout"
@@ -46,6 +46,7 @@ const router = createBrowserRouter(
         <Route index path="/home" element={<Tracker />} />
         <Route path="/projects" element={<Projects />} />
       </Route>
+      <Route path="*" element={<Navigate to="/login" replace />} />
       <Route
         path="/*"
         element={
