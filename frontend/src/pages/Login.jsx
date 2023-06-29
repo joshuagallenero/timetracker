@@ -9,7 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { login } from '../api/auth';
-import { checkTokens, setToStorage } from '../utils/storage';
+import { checkToken, setToStorage } from '../utils/storage';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -30,8 +30,10 @@ export default function Login() {
     loginMutation.mutate(data);
   });
 
+  const { isLoading, isError } = loginMutation;
+
   useEffect(() => {
-    if (checkTokens()) {
+    if (checkToken()) {
       navigate('/home');
     }
   }, [navigate]);
@@ -48,7 +50,7 @@ export default function Login() {
 
         <div className="rounded-2xl max-w-lg w-full">
           <div className="bg-white border rounded-lg shadow-lg shadow-blue-200 shrink-0 px-4 py-6 space-y-8">
-            {loginMutation.error && (
+            {isError && (
               <Banner
                 title="Login failed"
                 kind="negative"
@@ -117,6 +119,7 @@ export default function Login() {
                 }}
                 size="compact"
                 type="submit"
+                isLoading={isLoading}
               >
                 Login
               </Button>
@@ -126,6 +129,7 @@ export default function Login() {
             Don&apos;t have an account?
             <Link
               to="/register"
+              aria-disabled={isLoading}
               className="ml-2 text-sm text-blue-400 font-prompt hover:underline"
             >
               Register Now

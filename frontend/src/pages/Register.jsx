@@ -9,7 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { register } from '../api/auth';
-import { checkTokens, setToStorage } from '../utils/storage';
+import { checkToken, setToStorage } from '../utils/storage';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function Register() {
   });
 
   useEffect(() => {
-    if (checkTokens()) {
+    if (checkToken()) {
       navigate('/home');
     }
   }, [navigate]);
