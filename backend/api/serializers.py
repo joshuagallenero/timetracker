@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from .models import Project, TimeRecord
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,3 +50,38 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class TimeRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeRecord
+        fields = [
+            "id",
+            "description",
+            "project",
+            "time_started",
+            "time_ended",
+            "duration",
+        ]
+        extra_kwargs = {"duration": {"read_only": True}}
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        user = request.user
+        validated_data["user"] = user
+        return super().create(validated_data)
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    records = serializers.SerializerMethodField()
+
+    def get_records(self, obj):
+        user = self.context["request"].user
+
+        records = TimeRecord.objects.filter(user=user).order_by("-id")
+        return TimeRecordSerializer(records, many=True, context={"user": user}).data
+
+    class Meta:
+        model = Project
+        fields = ["id", "name", "records"]
+        extra_kwargs = {"users": {"read_only": True}}
