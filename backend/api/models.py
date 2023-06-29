@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+optional = {"null": True, "blank": True}
+
 
 class Project(models.Model):
     name = models.CharField(max_length=100)
@@ -12,8 +14,8 @@ class Project(models.Model):
 
 class TimeRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    description = models.CharField(max_length=100)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, **optional)
+    description = models.CharField(max_length=100, **optional)
     time_started = models.DateTimeField()
     time_ended = models.DateTimeField()
     duration = models.DurationField()
