@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from 'baseui/button';
 import { Skeleton } from 'baseui/skeleton';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Clock } from 'react-feather';
 
+import DeleteRecordModal from './features/DeleteRecordModal';
 import TimeRecordForm from './features/TimeRecordForm';
 
 import { fetchTimeRecords, partialUpdateTimeRecord } from '../../api/records';
@@ -22,12 +23,16 @@ export default function RecordsList({ projects }) {
     queryFn: fetchTimeRecords,
   });
 
-  const taskMutation = useMutation({
+  const createTaskMutation = useMutation({
     mutationFn: partialUpdateTimeRecord,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['records'] });
     },
   });
+
+  const [deleteModalVisibility, setDeleteModalVisibility] = useState(false);
+
+  const [recordId, setRecordId] = useState('');
 
   const getCurrentWeekTotal = (records) => {
     if (records && records.length < 1) {
@@ -43,7 +48,7 @@ export default function RecordsList({ projects }) {
   };
 
   const weekIntervals = useMemo(() => {
-    if (recordData && recordData.length > 1) {
+    if (recordData && recordData.length > 0) {
       const dates = [];
       recordData.forEach((record) => {
         const { startTime } = record;
@@ -71,7 +76,7 @@ export default function RecordsList({ projects }) {
   }, [recordData]);
 
   const handleEditTask = (data) => {
-    taskMutation.mutate({ data, queryParams: { id: data.id } });
+    createTaskMutation.mutate({ data, queryParams: { id: data.id } });
   };
 
   if (isLoading) {
@@ -119,74 +124,87 @@ export default function RecordsList({ projects }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col space-y-4">
-      <h1>Current Week:</h1>
+    <>
+      <DeleteRecordModal
+        isOpen={deleteModalVisibility}
+        setVisibility={setDeleteModalVisibility}
+        recordId={recordId}
+      />
+      <div className="flex flex-1 flex-col space-y-4">
+        <h1>Current Week:</h1>
 
-      {weekIntervals.map(([firstDayOfTheWeek, lastDayOfTheWeek]) => (
-        <div key={firstDayOfTheWeek} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              {firstDayOfTheWeek.toLocaleDateString('default', {
-                month: 'long',
-                day: '2-digit',
-              })}{' '}
-              -{' '}
-              {lastDayOfTheWeek.toLocaleDateString('default', {
-                month: 'long',
-                day: '2-digit',
-              })}
+        {weekIntervals &&
+          weekIntervals.length > 0 &&
+          weekIntervals.map(([firstDayOfTheWeek, lastDayOfTheWeek]) => (
+            <div key={firstDayOfTheWeek} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  {firstDayOfTheWeek.toLocaleDateString('default', {
+                    month: 'long',
+                    day: '2-digit',
+                  })}{' '}
+                  -{' '}
+                  {lastDayOfTheWeek.toLocaleDateString('default', {
+                    month: 'long',
+                    day: '2-digit',
+                  })}
+                </div>
+                <div className="text-sm">
+                  <span className="text-gray-500">Week Total: </span>
+                  {getCurrentWeekTotal(
+                    recordData.filter((record) => {
+                      const [recordFirstDay] = getCurrentWeek(
+                        new Date(record.time_started),
+                      );
+
+                      return (
+                        firstDayOfTheWeek.toLocaleDateString() ===
+                        recordFirstDay.toLocaleDateString()
+                      );
+                    }),
+                  )}
+                </div>
+              </div>
+
+              <ul className="flex flex-col mb-4 space-y-4">
+                {recordData
+                  .sort((a, b) => b.time_started.localeCompare(a.time_started))
+                  .map((record, index) => {
+                    const [recordFirstDay] = getCurrentWeek(
+                      new Date(record.time_started),
+                    );
+
+                    if (
+                      firstDayOfTheWeek.toLocaleDateString() ===
+                      recordFirstDay.toLocaleDateString()
+                    ) {
+                      return (
+                        <li key={record.id || index}>
+                          <TimeRecordForm
+                            isEditing={true}
+                            projects={projects}
+                            initialValues={{
+                              // have to assign taskDate and startTime here; for some reason declaring them in `records.js` doesn't give accurate dates
+                              ...record,
+                              taskDate: new Date(record.time_started),
+                              startTime: new Date(record.time_started),
+                            }}
+                            onSubmitHandler={handleEditTask}
+                            onDeleteHandler={() => {
+                              setRecordId(record.id);
+                              setDeleteModalVisibility((prev) => !prev);
+                            }}
+                          />
+                        </li>
+                      );
+                    }
+
+                    return <></>;
+                  })}
+              </ul>
             </div>
-            <div className="text-sm">
-              <span className="text-gray-500">Week Total: </span>
-              {getCurrentWeekTotal(
-                recordData.filter((record) => {
-                  const [recordFirstDay] = getCurrentWeek(
-                    new Date(record.time_started),
-                  );
-
-                  return (
-                    firstDayOfTheWeek.toLocaleDateString() ===
-                    recordFirstDay.toLocaleDateString()
-                  );
-                }),
-              )}
-            </div>
-          </div>
-
-          <ul className="flex flex-col mb-4 space-y-4">
-            {recordData
-              .sort((a, b) => b.time_started.localeCompare(a.time_started))
-              .map((record, index) => {
-                const [recordFirstDay] = getCurrentWeek(
-                  new Date(record.time_started),
-                );
-
-                if (
-                  firstDayOfTheWeek.toLocaleDateString() ===
-                  recordFirstDay.toLocaleDateString()
-                ) {
-                  return (
-                    <li key={record.id || index}>
-                      <TimeRecordForm
-                        isEditing={true}
-                        projects={projects}
-                        initialValues={{
-                          // have to assign taskDate and startTime here; for some reason declaring them in `records.js` doesn't give accurate dates
-                          ...record,
-                          taskDate: new Date(record.time_started),
-                          startTime: new Date(record.time_started),
-                        }}
-                        onSubmitHandler={handleEditTask}
-                      />
-                    </li>
-                  );
-                }
-
-                return <></>;
-              })}
-          </ul>
-        </div>
-      ))}
-    </div>
+          ))}
+      </div>
+    </>
   );
 }

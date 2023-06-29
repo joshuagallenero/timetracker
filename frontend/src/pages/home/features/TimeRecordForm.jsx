@@ -7,7 +7,7 @@ import { Select } from 'baseui/select';
 import { TimePicker } from 'baseui/timepicker';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
-import { Calendar, MoreVertical, X } from 'react-feather';
+import { Calendar, MoreVertical, Trash, X } from 'react-feather';
 import { Controller, useForm } from 'react-hook-form';
 
 import DurationInput from './DurationInput';
@@ -19,6 +19,7 @@ export default function TimeRecordForm({
   isLoading,
   initialValues,
   onSubmitHandler,
+  onDeleteHandler,
   setModalVisibility,
 }) {
   const {
@@ -124,7 +125,7 @@ export default function TimeRecordForm({
 
         return;
       }
-      
+
       // else, trigger submit when user manually submits form
       onSubmitHandler(
         {
@@ -188,13 +189,24 @@ export default function TimeRecordForm({
   return (
     <div className="bg-white border rounded-md shadow-md shrink-0 py-1 px-2 md:py-2 md:px-4">
       {isEditing && (
-        <div className="mt-[-0.25rem] mx-[-0.5rem] rounded-t-md pl-4 py-2 bg-blue-400">
+        <div className="flex items-center justify-between mt-[-0.25rem] mx-[-0.5rem] rounded-t-md p-4 py-2 bg-blue-400">
           <h6 className="text-sm text-white underline">
             {initialValues?.taskDate?.toLocaleDateString('default', {
               month: 'long',
               day: '2-digit',
             })}
           </h6>
+          <Button
+            className="bg-red-400 text-sm p-2 ml-2"
+            overrides={{
+              StartEnhancer: {
+                props: { className: 'mr-0 p-0' },
+              },
+            }}
+            size="compact"
+            startEnhancer={<Trash size={16} />}
+            onClick={onDeleteHandler}
+          />
         </div>
       )}
       <form

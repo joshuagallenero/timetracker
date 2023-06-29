@@ -51,7 +51,7 @@ export default function Root() {
 
   return (
     <>
-      <div className="flex items-center justify-between bg-blue-400 py-2 sticky top-0 z-40">
+      <div className="flex items-center justify-between bg-blue-400 py-2 top-0 z-40">
         <div className="flex items-center">
           <Button
             ref={menuRef}

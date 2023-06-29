@@ -44,3 +44,7 @@ export async function partialUpdateTimeRecord({ data, queryParams }) {
 
   return await axios.patch(`/time_records/${id}/`, payload);
 }
+
+export async function deleteTimeRecord(id) {
+  return await axios.delete(`/time_records/${id}`);
+}
