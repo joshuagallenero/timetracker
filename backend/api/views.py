@@ -5,7 +5,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
 from .serializers import (
+    ProjectSerializer,
     RegisterUserSerializer,
+    TimeRecordSerializer,
     UserSerializer,
 )
 
@@ -54,3 +56,35 @@ class CustomAuthToken(ObtainAuthToken):
                 "token": token.key,
             }
         )
+
+
+class TimeRecordViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows time records to be viewed or edited.
+    """
+
+    serializer_class = TimeRecordSerializer
+    queryset = serializer_class.Meta.model.objects.all().order_by("-id")
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        This view should return a list of time tracked records based on the current user
+        """
+        filters = {"user": self.request.user}
+        project = self.request.query_params.get("project")
+
+        if project:
+            filters["project"] = project
+
+        return self.serializer_class.Meta.model.objects.filter(**filters)
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows projects to be viewed or edited.
+    """
+
+    serializer_class = ProjectSerializer
+    queryset = serializer_class.Meta.model.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
