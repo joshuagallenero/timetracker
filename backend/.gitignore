@@ -2,6 +2,7 @@
 *.log
 *.pot
 *.pyc
+local_settings.py
 __pycache__
 db.sqlite3
 media
@@ -12,6 +13,11 @@ __pycache__
 
 # Distribution / packaging
 .Python
+.env
+.env.local
+.env.staging
+.env.production
+!.env.example
 env/
 build/
 develop-eggs/
