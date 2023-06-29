@@ -12,7 +12,7 @@
   },
   "plugins": ["import", "react-refresh"],
   "extends": [
-    "react-app", 
+    "react-app",
     "plugin:jsx-a11y/recommended",
     "eslint:recommended",
     "plugin:react/jsx-runtime",
@@ -21,7 +21,8 @@
     "plugin:react-hooks/recommended"
   ],
   "rules": {
-    "no-console":"warn",
+    "no-console": "warn",
+    "no-unused-vars": "warn",
     "import/prefer-default-export": "off",
     "react/no-unused-prop-types": "off",
     "react/require-default-props": "off",
@@ -38,8 +39,8 @@
           "order": "asc"
         },
         "groups": [
-          "builtin",
           "external",
+          "builtin",
           "index",
           "sibling",
           "parent",
